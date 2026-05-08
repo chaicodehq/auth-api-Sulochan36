@@ -4,10 +4,10 @@ import { connectDB } from './db/connect.js';
 async function start() {
   try {
     // TODO: Read PORT from process.env, default to 3000
-    const port = undefined;
+    const port = process.env.PORT ?? 3000;
 
     // TODO: Read MONGO_URI from process.env, default to "mongodb://localhost:27017/auth_api"
-    const uri = undefined;
+    const uri = process.env.MONGO_URI ?? "mongodb://localhost:27017/auth_api";
 
     await connectDB(uri);
     const app = createApp();
@@ -21,4 +21,6 @@ async function start() {
   }
 }
 
-start();
+if (process.env.NODE_ENV !== 'test') {
+  start();
+}

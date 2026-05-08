@@ -18,9 +18,40 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema(
   {
     // Your schema fields here
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      minLength: 2,
+      maxLength: 50,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please fill a valid email address'],
+    },
+
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
+
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user'
+    }
+
   },
   {
     // Schema options here
+    timestamps: true
   }
 );
 
@@ -40,5 +71,19 @@ const userSchema = new mongoose.Schema(
  *   
  * });
  */
+userSchema.pre('save', async function (next) {
+  try {
+    if (!this.isModified('password')) return next();
+    if (!this.password) return next();
+    
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  } catch (err) {
+    next(err);
+  }
+
+});
+
 
 // TODO: Create and export the User model
+export const User = mongoose.model("User", userSchema);
